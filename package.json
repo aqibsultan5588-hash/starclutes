@@ -1,0 +1,9 @@
+{
+  "name": "star-catcher-game",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node serve-game.js"
+  }
+}

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>⭐ Kids Game Zone</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#4facfe">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { margin: 0; background: #1a1a2e; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    #game-wrapper { width: 800px; height: 500px; position: relative; background: #87CEEB; overflow: hidden; }
+    .screen, .game-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; flex-direction: column; }
+    .screen.active, .game-screen.active { display: flex; }
+  </style>
+</head>
+<body>
+<div id="game-wrapper">
+
+  <!-- HUD BAR (top across all games) -->
+  <div id="hud-bar">
+    <div class="hud-left">
+      <button id="home-btn" class="hud-top-btn" onclick="goHome()">🏠</button>
+      <span id="hud-score" class="hud-score-text">⭐ 0</span>
+    </div>
+    <span id="total-coins" class="hud-coins-text">🪙 0</span>
+    <div class="hud-right">
+      <span id="hud-level" class="hud-level-text">🎯 Lv 1</span>
+      <button id="music-toggle" class="hud-top-btn" onclick="Hub.toggleMusic()">🎵</button>
+      <button id="sfx-toggle" class="hud-top-btn" onclick="Hub.toggleSfx()">🔊</button>
+    </div>
+  </div>
+
+  <!-- ===== HUB / MAIN MENU ===== -->
+  <div id="hub-screen" class="screen active">
+    <div class="hub-title">🎮 Kids Game Zone</div>
+    <div class="hub-subtitle">Choose a game to play!</div>
+    <div class="hub-games">
+      <div class="hub-game-card" onclick="startStarCatcher()">
+        <div class="hub-game-icon">⭐</div>
+        <div class="hub-game-name">Star Catcher</div>
+        <div class="hub-game-desc">Catch stars, dodge baddies!</div>
+      </div>
+      <div class="hub-game-card" onclick="startMemoryGame()">
+        <div class="hub-game-icon">🧠</div>
+        <div class="hub-game-name">Memory Match</div>
+        <div class="hub-game-desc">Flip & match the pairs!</div>
+      </div>
+      <div class="hub-game-card" onclick="startBubbleGame()">
+        <div class="hub-game-icon">🔫</div>
+        <div class="hub-game-name">Bubble Shooter</div>
+        <div class="hub-game-desc">Aim & shoot matching bubbles!</div>
+      </div>
+    </div>
+    <div class="hub-coins-display">🪙 Coins: <span id="hub-coins">0</span></div>
+  </div>
+
+  <!-- ===== WELCOME SCREEN (Star Catcher) ===== -->
+  <div id="welcome-screen" class="screen">
+    <div class="welcome-clouds"></div>
+    <div class="welcome-star">🌟</div>
+    <h1 class="welcome-title">Star Catcher</h1>
+    <p class="welcome-sub">A fun adventure for kids!</p>
+    <button id="welcome-btn" class="btn btn-play">▶ Let's Go!</button>
+  </div>
+
+  <!-- ===== LOADING SCREEN ===== -->
+  <div id="loading-screen" class="screen">
+    <div class="loading-star">⭐</div>
+    <p class="loading-text">Getting ready...</p>
+    <div class="loading-bar-track">
+      <div id="loading-bar" class="loading-bar-fill"></div>
+    </div>
+    <p id="loading-tip" class="loading-tip"></p>
+  </div>
+
+  <!-- ===== START SCREEN (Star Catcher) ===== -->
+  <div id="start-screen" class="screen">
+    <div class="star-burst">⭐</div>
+    <h1 class="game-title">Star Catcher</h1>
+    <p class="subtitle">Catch the stars, dodge the baddies!</p>
+    <button id="start-btn" class="btn btn-play">▶ PLAY</button>
+    <div id="start-highscore" class="highscore-display">🏆 Best: 0</div>
+    <div id="start-history" class="history-container"></div>
+    <div class="customize-row">
+      <span class="customize-label">My Color:</span>
+      <button class="color-btn" data-color="#5dade2" style="background:#5dade2"></button>
+      <button class="color-btn" data-color="#e74c3c" style="background:#e74c3c"></button>
+      <button class="color-btn" data-color="#2ecc71" style="background:#2ecc71"></button>
+      <button class="color-btn" data-color="#f39c12" style="background:#f39c12"></button>
+      <button class="color-btn" data-color="#9b59b6" style="background:#9b59b6"></button>
+      <button class="color-btn" data-color="#1abc9c" style="background:#1abc9c"></button>
+    </div>
+    <div class="controls-hint">
+      <span>← → Move</span>
+      <span>↑ Jump ×2</span>
+    </div>
+  </div>
+
+  <!-- ===== STAR CATCHER GAME ===== -->
+  <div id="star-catcher-screen" class="game-screen">
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+    <div id="hud">
+      <div id="hud-left">
+        <span id="score-display">⭐ 0</span>
+        <span id="lives-display"></span>
+        <span id="combo-display"></span>
+      </div>
+      <div id="hud-center">
+        <span id="timer-display">⏱ 0:00</span>
+        <span id="powerup-display"></span>
+      </div>
+      <div id="hud-right">
+        <span id="highscore-display">🏆 0</span>
+        <button id="mute-btn" class="hud-btn">🔊</button>
+        <button id="pause-btn" class="hud-btn">⏸</button>
+      </div>
+    </div>
+    <div id="pause-overlay">
+      <div class="pause-box">
+        <h2 class="pause-title">PAUSED</h2>
+        <button id="resume-btn" class="btn btn-play">▶ Resume</button>
+        <button id="quit-btn" class="btn btn-menu">🏠 Quit</button>
+      </div>
+    </div>
+    <div id="achievement-toast"></div>
+    <div id="touch-controls">
+      <button id="touch-left" class="touch-btn">◀</button>
+      <button id="touch-right" class="touch-btn">▶</button>
+      <button id="touch-jump" class="touch-btn touch-jump">▲</button>
+    </div>
+  </div>
+
+  <!-- ===== GAME OVER SCREEN ===== -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-icon">💥</div>
+    <h1 class="gameover-title">Game Over!</h1>
+    <p id="final-score" class="final-score">Score: 0</p>
+    <p id="final-highscore" class="final-highscore">🏆 Best: 0</p>
+    <div id="gameover-history" class="history-container"></div>
+    <button id="restart-btn" class="btn btn-play">▶ Play Again</button>
+    <button id="menu-btn" class="btn btn-menu">🏠 Menu</button>
+  </div>
+
+  <!-- ===== MEMORY GAME ===== -->
+  <div id="memory-screen" class="game-screen">
+    <div class="memory-top">
+      <span>Attempts: <span id="memory-attempts">0</span></span>
+      <span>⏱ <span id="memory-timer">0:00</span></span>
+    </div>
+    <div class="memory-grid" id="memory-grid"></div>
+    <div id="memory-status" class="memory-status"></div>
+    <div class="memory-bottom">
+      <button id="memory-restart-btn" class="btn-small" onclick="initMemoryGame()">🔄 Restart</button>
+      <button class="btn-small" onclick="goHome()">🏠 Home</button>
+    </div>
+  </div>
+
+  <!-- ===== BUBBLE SHOOTER GAME ===== -->
+  <div id="bubble-screen" class="game-screen">
+    <canvas id="bubble-canvas" width="800" height="500"></canvas>
+    <div id="bubble-container" style="position:absolute;inset:0;pointer-events:none;"></div>
+    <div id="bubble-status" class="bubble-status" style="position:absolute;top:55px;left:0;right:0;text-align:center;z-index:10;pointer-events:none;font-family:'Fredoka One',cursive;font-size:20px;"></div>
+    <span id="bubble-score" style="display:none"></span>
+    <span id="bubble-target2" style="display:none"></span>
+    <span id="bubble-level" style="display:none"></span>
+    <div style="position:absolute;bottom:8px;z-index:10;display:flex;gap:10px;">
+      <button class="btn-small" onclick="startBubbleGame()">🔄 Restart</button>
+      <button class="btn-small" onclick="goHome()">🏠 Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="hub.js"></script>
+<script src="memory.js"></script>
+<script src="bubble.js"></script>
+<script src="game.js"></script>
+<script>
+  function goHome() {
+    if (Hub) {
+      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('hub-screen')?.classList.add('active');
+      document.getElementById('hud-bar')?.classList.add('active');
+      Hub.updateCoinDisplay();
+      document.getElementById('hub-coins').textContent = Hub.totalCoins;
+    }
+    const hs = document.getElementById('hud-score');
+    if (hs) hs.textContent = '⭐ 0';
+    const hl = document.getElementById('hud-level');
+    if (hl) hl.textContent = '🎯 Lv 1';
+    if (typeof paused !== 'undefined') {
+      if (gameState === 'playing') paused = false;
+      document.getElementById('pause-overlay')?.classList.remove('active');
+    }
+    if (typeof BS !== 'undefined' && BS.animId) {
+      cancelAnimationFrame(BS.animId);
+      BS.animId = null;
+    }
+    if (typeof memoryState !== 'undefined' && memoryState.timerInterval) {
+      clearInterval(memoryState.timerInterval);
+      memoryState.timerInterval = null;
+    }
+  }
+
+  function startStarCatcher() {
+    document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('hud-bar')?.classList.add('active');
+    document.getElementById('welcome-screen')?.classList.add('active');
+    if (typeof gameState !== 'undefined') gameState = 'welcome';
+  }
+
+  Hub.init();
+  Hub.startMusic();
+  document.getElementById('hub-coins').textContent = Hub.totalCoins;
+  document.getElementById('hud-bar').classList.add('active');
+</script>
+<script>
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
